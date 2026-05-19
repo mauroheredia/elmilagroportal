@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>El Milagro - Portal Interno</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="light">
+  
+  <!-- PORTAL LAYOUT -->
+  <div id="portalLayout" class="admin-layout" style="display: none;">
+    <aside class="admin-sidebar" id="sidebarMenu">
+      <div style="padding: 0 1.5rem; margin-bottom: 2rem;">
+        <img src="logo.png" alt="Logo" style="height: 40px; vertical-align: middle;">
+      </div>
+      <nav id="navLinks">
+        <!-- Menu Render -->
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+        <div>
+          <h2 id="portalTitle" style="margin-bottom: 0.2rem;">Panel Unificado</h2>
+          <p id="portalUserInfo" style="color: var(--text-secondary);">Acceso Operativo Centralizado</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="theme-toggle-group">
+            <button class="theme-btn active" data-theme-btn="light" title="Claro">☀️</button>
+            <button class="theme-btn" data-theme-btn="dark" title="Oscuro">🌙</button>
+          </div>
+          <button id="btnLogout" class="btn btn-outline">Salir</button>
+        </div>
+      </header>
+
+      <div id="contentSections">
+        
+        <!-- SECTION: PRODUCTOS -->
+        <section id="sec-productos" class="portal-section" style="display:none;">
+          <div class="admin-grid">
+            <section>
+              <div class="admin-card">
+                <h3>Agregar / Editar Producto</h3>
+                <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                  Los productos nuevos se guardan <b>localmente</b> hasta subir en lote.
+                </p>
+                <form id="productForm">
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                      <label>Nombre del Producto *</label>
+                      <input type="text" id="prodName" required>
+                    </div>
+                    <div class="form-group">
+                      <label>Precio *</label>
+                      <input type="number" step="0.01" id="prodPrice" required>
+                    </div>
+                  </div>
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                      <label>Categoría *</label>
+                      <select id="prodCategory" required></select>
+                    </div>
+                    <div class="form-group">
+                      <label>Stock</label>
+                      <input type="number" id="prodStock" value="100">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>URL de Imagen</label>
+                    <input type="url" id="prodImage" placeholder="https://...">
+                    <div class="image-preview-container" id="imagePreviewContainer">
+                      <span>Pegar URL para vista previa</span>
+                      <img src="" alt="Preview" id="imagePreview" onerror="this.src='https://via.placeholder.com/400x300'">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="prodDesc" rows="3"></textarea>
+                  </div>
+                  <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:2rem;">
+                    <button type="button" class="btn btn-outline" id="btnCancelEdit" style="display:none;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveProduct">
+                      <span>Guardar Original</span>
+                      <div class="spinner" id="prodSpinner"></div>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </section>
+            
+            <aside>
+              <div class="admin-card" style="border: 2px solid var(--amarillo);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                  <h3 style="margin:0; display:flex; align-items:center;">Borradores Locales <span class="badge-featured" id="localDraftCount" style="position:relative; margin-left:10px;">0</span></h3>
+                </div>
+                <button class="btn btn-success" id="btnBulkUpload" style="width: 100%; margin-bottom: 1rem;" disabled>☁️ Subir a Firebase</button>
+                <div id="adminLocalProductList" style="max-height: 300px; overflow-y: auto;"></div>
+              </div>
+
+              <div class="admin-card">
+                <h3>Productos en Nube</h3>
+                <div id="adminProductList" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- SECTION: CATEGORÍAS -->
+        <section id="sec-categorias" class="portal-section" style="display:none;">
+          <div class="admin-card" style="max-width: 600px;">
+            <h3>Categorías</h3>
+            <form id="categoryForm" style="margin-top: 1rem;">
+              <div class="form-group">
+                <label>Nombre de Categoría</label>
+                <input type="text" id="catName" required>
+              </div>
+              <div class="form-group">
+                <label>Icono (Emoji)</label>
+                <input type="text" id="catIcon" placeholder="ej: 🍔">
+              </div>
+              <div class="form-group">
+                <label>Orden</label>
+                <input type="number" id="catOrder" value="0" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%">
+                Guardar Categoría
+                <div class="spinner" id="catSpinner"></div>
+              </button>
+            </form>
+            <hr style="border:0; border-top:1px solid var(--border-color); margin: 2rem 0;">
+            <div id="adminCategoryList"></div>
+          </div>
+        </section>
+
+        <!-- SECTION: PEDIDOS -->
+        <section id="sec-pedidos" class="portal-section" style="display:none;">
+          <div class="admin-card">
+            
+            <div id="orderBranchSelector" style="margin-bottom:1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+              <label><strong>¿En qué sucursal estás? (Filtro)</strong></label>
+              <select id="activeBranch" class="form-group" style="margin-top: 0.5rem;" onchange="window.setBranch(this.value)">
+                <option value="">-- Seleccioná una sucursal --</option>
+              </select>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+              <h3 style="color:var(--rojo); margin:0;">Monitor de Pedidos</h3>
+              <div style="display: flex; gap: 1rem;">
+                <select id="orderStatusFilter" class="form-group" style="margin: 0; padding: 0.5rem 1rem;">
+                  <option value="todos">Todos</option>
+                  <option value="no_autorizado">No Autorizado</option>
+                  <option value="pending">Pendiente</option>
+                  <option value="preparando">Preparando</option>
+                  <option value="en_camino">En Camino</option>
+                  <option value="retirar_en_sucursal">Retirar en Sucursal (Fallo)</option>
+                  <option value="pagado">Pagado</option>
+                  <option value="entregado">Entregado</option>
+                </select>
+                <button class="btn btn-outline" id="btnRefreshOrders">🔄 Recargar</button>
+              </div>
+            </div>
+            <div id="adminOrdersList" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+          </div>
+        </section>
+
+
+
+        <!-- SECTION: PRECIOS -->
+        <section id="sec-precios" class="portal-section" style="display:none;">
+          <div class="admin-card">
+            <h3>Actualización Rápida de Precios y Stock</h3>
+            <select id="priceCatFilter" style="margin-bottom: 1rem; max-width: 300px; padding: 0.5rem;"><option value="all">Todas</option></select>
+            <div style="overflow-x: auto;">
+              <table style="width:100%; text-align:left; border-collapse: collapse;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-color);">
+                    <th style="padding:1rem;">Producto</th>
+                    <th style="padding:1rem;">Precio ($)</th>
+                    <th style="padding:1rem;">Stock</th>
+                  </tr>
+                </thead>
+                <tbody id="pricesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: PAGOS -->
+        <section id="sec-pagos" class="portal-section" style="display:none;">
+          <div class="admin-card">
+            
+            <div style="margin-bottom:1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+              <label><strong>¿En qué sucursal estás? (Filtro)</strong></label>
+              <select id="activeBranchPagos" class="form-group" style="margin-top: 0.5rem;" onchange="window.setBranch(this.value)">
+                <option value="">-- Seleccioná una sucursal --</option>
+              </select>
+            </div>
+
+            <h3>Pedidos Pendientes de Pago</h3>
+            <div id="pagosList" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+          </div>
+        </section>
+
+        <!-- SECTION: COMBOS -->
+        <section id="sec-combos" class="portal-section" style="display:none;">
+          <div class="admin-card">
+            <h3>Gestión de Combos (Destacados)</h3>
+            <form id="comboForm" style="margin-bottom: 2rem;">
+               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                  <div class="form-group">
+                    <label>Nombre del Producto *</label>
+                    <input type="text" id="comboName" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Precio *</label>
+                    <input type="number" step="0.01" id="comboPrice" required>
+                  </div>
+               </div>
+               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                  <div class="form-group">
+                    <label>Precio Oferta *</label>
+                    <input type="number" step="0.01" id="comboOfferPrice" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Vencimiento Oferta *</label>
+                    <input type="date" id="comboOfferExpires" required>
+                  </div>
+               </div>
+               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                  <div class="form-group">
+                    <label>Categoría *</label>
+                    <select id="comboCategory" required></select>
+                  </div>
+                  <div class="form-group">
+                    <label>URL de Imagen</label>
+                    <input type="url" id="comboImage" placeholder="https://...">
+                  </div>
+               </div>
+               <button type="submit" class="btn btn-success" style="width:100%;">Agregar Combo Destacado</button>
+            </form>
+            <div id="comboList"></div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toastMessage">Acción completada</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, getDoc, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSjlHVAIWy8LiPaoD31biyTQ3W_UdL5us",
+      authDomain: "lacteos-elmilagro.firebaseapp.com",
+      projectId: "lacteos-elmilagro",
+      storageBucket: "lacteos-elmilagro.firebasestorage.app",
+      messagingSenderId: "1048870846106",
+      appId: "1:1048870846106:web:4b0071677f22f80b12a923"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const PORTAL_PASSWORD = 'lacteos1214';
+
+    function checkAccess() {
+      const saved = sessionStorage.getItem('portal_auth');
+      if (saved === PORTAL_PASSWORD) return true;
+      
+      const input = prompt('🔐 Contraseña del portal:');
+      if (input === PORTAL_PASSWORD) {
+        sessionStorage.setItem('portal_auth', PORTAL_PASSWORD);
+        return true;
+      }
+      document.body.innerHTML = '<div style="text-align:center;padding:4rem;font-family:sans-serif;"><h2>Acceso denegado</h2><button onclick="location.reload()">Reintentar</button></div>';
+      return false;
+    }
+
+    if (!document.getElementById('portalLayout')) {
+      // Body was overwritten
+    } else {
+      if (!checkAccess()) throw new Error("Auth block");
+
+      document.getElementById('portalLayout').style.display = 'flex';
+
+      // GLOBALS & STATE
+      let activeBranch = sessionStorage.getItem('active_branch') || '';
+      
+      let categories = [];
+      let products = [];
+      let orders = [];
+      const branches = [
+        {name: 'Sucursal Bolivia'},
+        {name: 'Sucursal Chile'},
+        {name: 'Sucursal Artigas'},
+        {name: 'Sucursal Arenales'},
+        {name: 'Sucursal Orán'}
+      ];
+      let productsForPrices = [];
+
+      let localDrafts = JSON.parse(localStorage.getItem('admin_local_drafts')) || [];
+      let currentOrderStatus = 'todos';
+      let editingProductId = null;
+      let editingDraftId = null;
+
+      const toastMessage = document.getElementById('toastMessage');
+
+      window.showToast = function(message, type = 'success') {
+        toastMessage.textContent = message;
+        toastMessage.className = `toast show ${type}`;
+        setTimeout(() => toastMessage.classList.remove('show'), 3000);
+      };
+
+      // TABS DEFINITION
+      const TABS = [
+        { id: 'sec-productos', label: 'Productos', icon: '📦' },
+        { id: 'sec-categorias', label: 'Categorías', icon: '🏷️' },
+        { id: 'sec-precios', label: 'Precios', icon: '💲' },
+        { id: 'sec-combos', label: 'Combos', icon: '🎁' },
+        { id: 'sec-pedidos', label: 'Pedidos', icon: '🛵' },
+        { id: 'sec-pagos', label: 'Pagos', icon: '💳' },
+      ];
+
+      function renderNavigation() {
+        const navLinks = document.getElementById('navLinks');
+        navLinks.innerHTML = '';
+        TABS.forEach((link, idx) => {
+          const a = document.createElement('a');
+          a.className = `admin-menu-item ${idx === 0 ? 'active' : ''}`;
+          a.innerHTML = `${link.icon} ${link.label}`;
+          a.onclick = () => {
+            document.querySelectorAll('.admin-menu-item').forEach(el => el.classList.remove('active'));
+            a.classList.add('active');
+            document.querySelectorAll('.portal-section').forEach(sec => sec.style.display = 'none');
+            document.getElementById(link.id).style.display = 'block';
+
+            // Lazy load specific tab data if needed
+            triggerTabLoad(link.id);
+          };
+          navLinks.appendChild(a);
+        });
+
+        document.querySelectorAll('.portal-section').forEach(sec => sec.style.display = 'none');
+        document.getElementById(TABS[0].id).style.display = 'block';
+      }
+
+      function triggerTabLoad(id) {
+        if(id === 'sec-productos') { fetchCategoriesForSelect(); fetchProducts(); renderLocalDrafts(); }
+        if(id === 'sec-categorias') fetchCategories();
+        if(id === 'sec-precios') { fetchCategoriesForFilter(); fetchProductsForPrices(); }
+        if(id === 'sec-combos') { fetchCategoriesForSelect('comboCategory'); fetchCombos(); }
+        if(id === 'sec-pedidos' || id === 'sec-pagos') { syncBranchSelectors(); fetchOrders(); }
+      }
+
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        sessionStorage.removeItem('portal_auth');
+        location.reload();
+      });
+
+      async function init() {
+        renderNavigation();
+        initTheme();
+        setupListeners();
+        syncBranchSelectors();
+        await fetchCategories();
+        triggerTabLoad(TABS[0].id);
+      }
+      init();
+
+
+      function syncBranchSelectors() {
+        const selects = [document.getElementById('activeBranch'), document.getElementById('activeBranchPagos')];
+        selects.forEach(sel => {
+          if (!sel) return;
+          const oldVal = activeBranch; // save
+          sel.innerHTML = '<option value="">-- Seleccioná una sucursal --</option>';
+          branches.forEach(b => {
+             const opt = document.createElement('option');
+             opt.value = b.name; opt.textContent = b.name;
+             sel.appendChild(opt);
+          });
+          sel.value = oldVal;
+        });
+      }
+
+      window.setBranch = async function(val) {
+        activeBranch = val;
+        sessionStorage.setItem('active_branch', val);
+        syncBranchSelectors(); // keeping them in sync visually
+        await fetchOrders();
+        fetchPendingPayments();
+      }
+
+
+
+      // --- PEDIDOS Y PAGOS ---
+      async function fetchOrders() {
+        try {
+          const qSnap = await getDocs(collection(db, "orders"));
+          orders = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          orders.sort((a,b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+          renderOrdersList();
+        } catch(e) { console.error('fetchOrders', e); }
+      }
+
+      function renderOrdersList() {
+        const listEl = document.getElementById('adminOrdersList');
+        if(!listEl) return;
+        listEl.innerHTML = '';
+        
+        // Filter locally because we loaded all 
+        let filteredOrders = orders;
+        if(currentOrderStatus !== 'todos') filteredOrders = filteredOrders.filter(o => o.status === currentOrderStatus);
+        if(activeBranch) filteredOrders = filteredOrders.filter(o => o.branch === activeBranch);
+
+        if(filteredOrders.length === 0) { listEl.innerHTML = '<p>No hay pedidos.</p>'; return; }
+
+        filteredOrders.forEach((order) => {
+          let isPaidStr = order.isPaid ? 'Pagado ✅' : 'Falta Pago ⏳';
+          const itemsHTML = order.items.map(i => `<div>${i.quantity}x ${i.name}</div>`).join('');
+          
+          const btnAct = (lbl, cod) => `<button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="window.updateOrderStatus('${order.id}', '${cod}')">${lbl}</button>`;
+
+          const div = document.createElement('div');
+          div.className = 'admin-list-item';
+          div.style.flexDirection = 'column'; div.style.alignItems = 'flex-start';
+          
+          div.innerHTML = `
+            <div style="width: 100%; display: flex; justify-content: space-between;">
+              <strong style="color:var(--primary-color)">Pedido #${order.id.slice(-5)}</strong>
+              <div style="font-size: 0.8rem;">${order.status} | ${isPaidStr}</div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); width: 100%;">
+              Cliente: ${order.customer?.name} (${order.customer?.phone}) | DNI: ${order.customer?.dni || 'N/A'} | Sucursal: ${order.branch||'Generica'}<br>
+              Lugar: ${order.customer?.address}
+            </div>
+            <div style="font-size: 0.85rem; background: var(--bg-color); padding: 0.5rem; width: 100%;">
+              ${itemsHTML}
+            </div>
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+              <span style="font-weight: bold; color: var(--success-color);">Total: $${Number(order.total).toFixed(2)}</span>
+              <div>
+                ${btnAct('⛔ No Autorizado', 'no_autorizado')}
+                ${btnAct('⏳ Pendiente', 'pending')}
+                ${btnAct('👨‍🍳 Preparando', 'preparando')}
+                ${btnAct('🛵 En Camino', 'en_camino')}
+                ${btnAct('📍 Retiro Sucursal', 'retirar_en_sucursal')}
+                ${btnAct('💳 Pagado', 'pagado')}
+                ${btnAct('✅ Entregado', 'entregado')}
+              </div>
+            </div>
+          `;
+          listEl.appendChild(div);
+        });
+      }
+
+      window.updateOrderStatus = async function(id, status) {
+        try {
+          await updateDoc(doc(db, "orders", id), { status });
+          window.showToast("Estado: "+status); fetchOrders(); fetchPendingPayments();
+        } catch(e) {}
+      }
+
+      async function fetchPendingPayments() {
+        if(orders.length === 0) await fetchOrders(); // load if not loaded
+        
+        let pending = orders.filter(o => !o.isPaid && ['transferencia', 'efectivo'].includes(o.paymentMethod));
+        if(activeBranch) pending = pending.filter(o => o.branch === activeBranch);
+        
+        const list = document.getElementById('pagosList');
+        if(!list) return;
+        list.innerHTML = '';
+        if(pending.length === 0) { list.innerHTML = '<p>No hay pendientes.</p>'; return; }
+        
+        pending.forEach(order => {
+          const div = document.createElement('div');
+          div.className = 'admin-card';
+          div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h4 style="margin-bottom:0.5rem;">Pedido #${order.id.slice(-5)} - ${order.customer?.name}</h4>
+                <div style="font-size:0.9rem;">DNI: ${order.customer?.dni || 'N/A'} | Método: ${order.paymentMethod}</div>
+              </div>
+              <button class="btn btn-success" onclick="window.markPaid('${order.id}')">✅ Marcar Pagado</button>
+            </div>`;
+          list.appendChild(div);
+        });
+      }
+
+      window.markPaid = async function(id) {
+        if(!confirm("Pagado?")) return;
+        try {
+          await updateDoc(doc(db, "orders", id), { isPaid: true, paidAt: serverTimestamp(), status: 'preparando' });
+          window.showToast("Aprobado"); fetchOrders(); fetchPendingPayments();
+        } catch(e){}
+      }
+
+
+      // --- PRODUCTOS BASE (ADMIN) ---
+      function renderLocalDrafts() {
+        const adminLocalProductList = document.getElementById('adminLocalProductList');
+        adminLocalProductList.innerHTML = '';
+        document.getElementById('localDraftCount').textContent = localDrafts.length;
+        document.getElementById('btnBulkUpload').disabled = localDrafts.length === 0;
+
+        localDrafts.forEach((p) => {
+          const code = `<div class="admin-list-item">
+            <div style="display:flex; gap:0.5rem;">
+              <img src="${p.imageURL || 'https://via.placeholder.com/150'}" style="width:40px; height:40px;" onerror="this.src='https://via.placeholder.com/150'">
+              <div>
+                <div>${p.name}</div><div style="color:var(--primary-color)">$${Number(p.price).toFixed(2)}</div>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-outline" style="padding: 0.1rem 0.4rem;" onclick="window.editProduct('${p.localId}', true)">✏️</button>
+              <button class="btn btn-danger" style="padding: 0.1rem 0.4rem;" onclick="window.deleteDraft('${p.localId}')">🗑️</button>
+            </div>
+          </div>`;
+          adminLocalProductList.insertAdjacentHTML('beforeend', code);
+        });
+      }
+
+      function saveDrafts() {
+        localStorage.setItem('admin_local_drafts', JSON.stringify(localDrafts));
+        renderLocalDrafts();
+      }
+
+      window.deleteDraft = function(localId) {
+        localDrafts = localDrafts.filter(d => d.localId !== localId);
+        saveDrafts();
+      }
+
+      window.editProduct = function(id, isDraft = false) {
+        let p = isDraft ? localDrafts.find(x => x.localId === id) : products.find(x => x.id === id);
+        if(!p) return;
+        editingProductId = isDraft ? null : id;
+        editingDraftId = isDraft ? id : null;
+        document.getElementById('prodName').value = p.name || '';
+        document.getElementById('prodPrice').value = p.price || '';
+        document.getElementById('prodCategory').value = p.category || '';
+        document.getElementById('prodStock').value = p.stock || 0;
+        document.getElementById('prodImage').value = p.imageURL || '';
+        document.getElementById('prodDesc').value = p.description || '';
+        document.getElementById('btnCancelEdit').style.display = 'inline-flex';
+        document.getElementById('btnSaveProduct').querySelector('span').textContent = isDraft ? 'Actualizar Borrador' : 'Actualizar Nube';
+      }
+
+      document.getElementById('productForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          name: document.getElementById('prodName').value.trim(),
+          price: parseFloat(document.getElementById('prodPrice').value),
+          category: document.getElementById('prodCategory').value,
+          stock: parseInt(document.getElementById('prodStock').value) || 0,
+          imageURL: document.getElementById('prodImage').value.trim(),
+          description: document.getElementById('prodDesc').value.trim(),
+          featured: false
+        };
+        if(editingProductId) {
+          try {
+             await updateDoc(doc(db, "products", editingProductId), data);
+             window.showToast("Nube actulizada"); fetchProducts(); document.getElementById('productForm').reset(); editingProductId=null;
+          } catch(err){}
+        } else if (editingDraftId) {
+          const idx = localDrafts.findIndex(d => d.localId === editingDraftId);
+          if(idx>-1) { localDrafts[idx] = {...localDrafts[idx], ...data}; saveDrafts(); window.showToast("Borrador actulizado"); }
+          document.getElementById('productForm').reset(); editingDraftId=null;
+        } else {
+          data.localId = 'draft_' + Date.now();
+          localDrafts.unshift(data); saveDrafts(); window.showToast("Añadido borrador"); document.getElementById('productForm').reset();
+        }
+      });
+      
+      document.getElementById('btnCancelEdit').addEventListener('click', () => {
+        editingProductId = null; editingDraftId = null;
+        document.getElementById('productForm').reset();
+        document.getElementById('btnCancelEdit').style.display = 'none';
+        document.getElementById('btnSaveProduct').querySelector('span').textContent = 'Guardar Original';
+      });
+
+      document.getElementById('btnBulkUpload').addEventListener('click', async () => {
+        if(!confirm(`¿Subir ${localDrafts.length} productos?`)) return;
+        const batch = writeBatch(db);
+        localDrafts.forEach(draft => {
+          const newRef = doc(collection(db, "products"));
+          const docData = { ...draft, createdAt: serverTimestamp() };
+          delete docData.localId;
+          batch.set(newRef, docData);
+        });
+        try {
+          await batch.commit(); window.showToast("¡Sincronizado!"); localDrafts=[]; saveDrafts(); fetchProducts();
+        } catch(e){}
+      });
+
+      async function fetchProducts() {
+        try {
+          const qSnap = await getDocs(collection(db, "products"));
+          products = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const list = document.getElementById('adminProductList');
+          list.innerHTML = '';
+          products.forEach(p => {
+             list.innerHTML += `<div class="admin-list-item">
+              <div><strong>${p.name} ☁️</strong> ($${p.price})</div>
+              <div>
+                <button class="btn btn-outline" style="padding: 0.25rem 0.5rem;" onclick="window.editProduct('${p.id}', false)">✏️</button>
+                <button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="window.deleteProduct('${p.id}')">🗑️</button>
+              </div>
+             </div>`;
+          });
+        } catch(e){}
+      }
+
+      window.deleteProduct = async function(id) {
+         if(!confirm('Borrar original nube?')) return;
+         try { await deleteDoc(doc(db, "products", id)); fetchProducts(); fetchProductsForPrices(); } catch(e){}
+      }
+
+
+      // --- CATEGORIAS ---
+      async function fetchCategories() {
+        try {
+          const qSnap = await getDocs(collection(db, "categories"));
+          categories = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const list = document.getElementById('adminCategoryList');
+          if(list) {
+            list.innerHTML = '';
+            categories.forEach(c => {
+               list.innerHTML += `<div class="admin-list-item">
+                <span>${c.icon||''} ${c.name}</span>
+                <button class="btn btn-danger" style="padding: 0.25rem; font-size:0.8rem;" onclick="window.deleteCategory('${c.id}')">E</button>
+               </div>`;
+            });
+          }
+        } catch(e){}
+      }
+      function fetchCategoriesForSelect(targetId = 'prodCategory') {
+         const sel = document.getElementById(targetId);
+         if(!sel) return;
+         sel.innerHTML = '<option value="">Selecciona</option>';
+         categories.forEach(c => { sel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+      }
+      function fetchCategoriesForFilter() {
+         const sel = document.getElementById('priceCatFilter');
+         sel.innerHTML = '<option value="all">Todas</option>';
+         categories.forEach(c => { sel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+      }
+
+      document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+         e.preventDefault();
+         const data = {
+           name: document.getElementById('catName').value.trim(),
+           icon: document.getElementById('catIcon').value.trim(),
+           order: parseInt(document.getElementById('catOrder').value) || 0
+         };
+         try { await addDoc(collection(db,"categories"), data); window.showToast("OK"); e.target.reset(); fetchCategories(); } catch(e){}
+      });
+      window.deleteCategory = async function(id) { if(!confirm("?")) return; try { await deleteDoc(doc(db,"categories",id)); fetchCategories(); } catch(e){} }
+
+
+      // --- PRECIOS ---
+      async function fetchProductsForPrices() {
+        try {
+          if(products.length === 0) {
+             const qSnap = await getDocs(collection(db, "products"));
+             products = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          }
+          productsForPrices = products;
+          window.renderPricesTable();
+        } catch(e){}
+      }
+
+      window.renderPricesTable = function() {
+        const tbody = document.getElementById('pricesTableBody');
+        tbody.innerHTML = '';
+        const filter = document.getElementById('priceCatFilter').value;
+        let pds = filter === 'all' ? productsForPrices : productsForPrices.filter(p => p.category === filter);
+        pds.forEach(p => {
+           tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.5rem;"><div style="font-weight:bold; font-size:0.9rem;">${p.name}</div><div style="font-size:0.75rem;">${p.category}</div></td>
+            <td style="padding: 0.5rem;"><input type="number" step="0.01" value="${p.price}" onblur="window.updatePriceField('${p.id}', 'price', this.value)" style="width: 80px;"></td>
+            <td style="padding: 0.5rem;"><input type="number" value="${p.stock||0}" onblur="window.updatePriceField('${p.id}', 'stock', this.value)" style="width: 60px;"></td>
+           </tr>`;
+        });
+      }
+
+      window.updatePriceField = async function(id, field, value) {
+         try {
+           const parsed = field==='price'? parseFloat(value):parseInt(value);
+           if(isNaN(parsed)) return;
+           await updateDoc(doc(db, "products", id), { [field]: parsed }); window.showToast(field + " actulizado");
+           const idx = productsForPrices.findIndex(x=>x.id===id); if(idx>-1) productsForPrices[idx][field] = parsed;
+         } catch(e){}
+      }
+      document.getElementById('priceCatFilter').addEventListener('change', window.renderPricesTable);
+
+
+      // --- COMBOS ---
+      async function fetchCombos() {
+         try {
+           const qSnap = await getDocs(query(collection(db, "products"), where("featured", "==", true)));
+           const combos = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+           const list = document.getElementById('comboList');
+           list.innerHTML = '';
+           combos.forEach(c => {
+             list.innerHTML += `<div class="admin-list-item">
+              <div><strong>${c.name}</strong><div style="font-size:0.8rem;color:var(--danger-color);">OFERTA: $${c.offerPrice}</div></div>
+              <button class="btn btn-outline" onclick="window.removeComboStatus('${c.id}')">Quitar Destacado</button>
+             </div>`;
+           });
+         } catch(e){}
+      }
+
+      document.getElementById('comboForm').addEventListener('submit', async(e)=>{
+         e.preventDefault();
+         const data = {
+           name: document.getElementById('comboName').value,
+           price: parseFloat(document.getElementById('comboPrice').value),
+           offerPrice: parseFloat(document.getElementById('comboOfferPrice').value),
+           offerExpires: document.getElementById('comboOfferExpires').value,
+           category: document.getElementById('comboCategory').value,
+           imageURL: document.getElementById('comboImage').value,
+           featured: true, stock: 999
+         };
+         try { await addDoc(collection(db, "products"), data); window.showToast("Agregado"); e.target.reset(); fetchCombos(); } catch(e){}
+      });
+
+      window.removeComboStatus = async function(id) {
+         try { await updateDoc(doc(db, "products", id), { featured: false }); window.showToast("Quitado"); fetchCombos(); } catch(e){}
+      }
+
+      // GLOBAL LISTENERS FOR REFRESH
+      document.getElementById('orderStatusFilter')?.addEventListener('change', e => { currentOrderStatus = e.target.value; renderOrdersList(); });
+      document.getElementById('btnRefreshOrders')?.addEventListener('click', () => { fetchOrders(); });
+
+      // UTILS
+      function setupListeners() {
+        const urlIn = document.getElementById('prodImage'), prev = document.getElementById('imagePreview'), pCon = document.getElementById('imagePreviewContainer');
+        if(urlIn) {
+           urlIn.addEventListener('input', () => {
+              if(urlIn.value.trim()) { prev.src = urlIn.value; pCon.classList.add('has-image'); }
+              else pCon.classList.remove('has-image');
+           });
+        }
+      }
+
+      function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        themeBtns.forEach(btn => {
+          if(btn.dataset.themeBtn === savedTheme) btn.classList.add('active');
+          btn.addEventListener('click', () => {
+            themeBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active');
+            let theme = btn.dataset.themeBtn; document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme);
+          });
+        });
+      }
+    }
+  </script>
+
+</body>
+</html>
