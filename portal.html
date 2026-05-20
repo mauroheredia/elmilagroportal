@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>El Milagro - Portal Interno</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
+
 <body data-theme="light">
-  
+
   <!-- PORTAL LAYOUT -->
   <div id="portalLayout" class="admin-layout" style="display: none;">
     <aside class="admin-sidebar" id="sidebarMenu">
@@ -19,7 +23,8 @@
     </aside>
 
     <main class="admin-main">
-      <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+      <header
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
         <div>
           <h2 id="portalTitle" style="margin-bottom: 0.2rem;">Panel Unificado</h2>
           <p id="portalUserInfo" style="color: var(--text-secondary);">Acceso Operativo Centralizado</p>
@@ -34,7 +39,7 @@
       </header>
 
       <div id="contentSections">
-        
+
         <!-- SECTION: PRODUCTOS -->
         <section id="sec-productos" class="portal-section" style="display:none;">
           <div class="admin-grid">
@@ -51,9 +56,13 @@
                       <input type="text" id="prodName" required>
                     </div>
                     <div class="form-group">
-                      <label>Precio *</label>
+                      <label>Precio Final *</label>
                       <input type="number" step="0.01" id="prodPrice" required>
                     </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Precio de Oferta (Opcional)</label>
+                    <input type="number" step="0.01" id="prodOfferPrice" placeholder="Dejar vacío si no hay oferta">
                   </div>
                   <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                     <div class="form-group">
@@ -70,7 +79,7 @@
                     <input type="url" id="prodImage" placeholder="https://...">
                     <div class="image-preview-container" id="imagePreviewContainer">
                       <span>Pegar URL para vista previa</span>
-                      <img src="" alt="Preview" id="imagePreview" onerror="this.src='https://via.placeholder.com/400x300'">
+                      <img src="" alt="Preview" id="imagePreview" onerror="this.src='logo.png'">
                     </div>
                   </div>
                   <div class="form-group">
@@ -78,7 +87,8 @@
                     <textarea id="prodDesc" rows="3"></textarea>
                   </div>
                   <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:2rem;">
-                    <button type="button" class="btn btn-outline" id="btnCancelEdit" style="display:none;">Cancelar</button>
+                    <button type="button" class="btn btn-outline" id="btnCancelEdit"
+                      style="display:none;">Cancelar</button>
                     <button type="submit" class="btn btn-primary" id="btnSaveProduct">
                       <span>Guardar Original</span>
                       <div class="spinner" id="prodSpinner"></div>
@@ -87,14 +97,38 @@
                 </form>
               </div>
             </section>
-            
+
             <aside>
               <div class="admin-card" style="border: 2px solid var(--amarillo);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-                  <h3 style="margin:0; display:flex; align-items:center;">Borradores Locales <span class="badge-featured" id="localDraftCount" style="position:relative; margin-left:10px;">0</span></h3>
+                  <h3 style="margin:0; display:flex; align-items:center;">Borradores Locales <span
+                      class="badge-featured" id="localDraftCount" style="position:relative; margin-left:10px;">0</span>
+                  </h3>
                 </div>
-                <button class="btn btn-success" id="btnBulkUpload" style="width: 100%; margin-bottom: 1rem;" disabled>☁️ Subir a Firebase</button>
-                <div id="adminLocalProductList" style="max-height: 300px; overflow-y: auto;"></div>
+                <button class="btn btn-success" id="btnBulkUpload" style="width: 100%; margin-bottom: 1rem;" disabled>☁️
+                  Subir a Firebase</button>
+
+                <div
+                  style="margin-top: 1rem; padding: 1.5rem; background: var(--amarillo); border-radius: 8px; border: 2px solid var(--verde);">
+                  <p style="margin-bottom: 0.5rem; font-weight: bold; color: var(--verde);">📡 Publicar en la tienda</p>
+                  <p style="font-size: 0.85rem; margin-bottom: 1rem; color: var(--verde);">
+                    Después de subir productos a Firebase, sincronizá para que aparezcan en la tienda pública (Storage).
+                  </p>
+                  <div class="form-group">
+                    <select id="syncCategorySelect"
+                      style="margin-bottom: 0.75rem; border-color: var(--verde);"></select>
+                  </div>
+                  <button class="btn btn-success" id="btnSyncCategory" style="width:100%; margin-bottom: 0.5rem;">
+                    🚀 Sincronizar categoría
+                    <div class="spinner" id="syncSpinner"></div>
+                  </button>
+                  <button class="btn btn-outline" id="btnSyncAll"
+                    style="width:100%; border-color: var(--verde); color: var(--verde);">
+                    🔄 Sincronizar TODO el catálogo
+                  </button>
+                </div>
+
+                <div id="adminLocalProductList" style="max-height: 300px; overflow-y: auto; margin-top: 1rem;"></div>
               </div>
 
               <div class="admin-card">
@@ -135,10 +169,12 @@
         <!-- SECTION: PEDIDOS -->
         <section id="sec-pedidos" class="portal-section" style="display:none;">
           <div class="admin-card">
-            
-            <div id="orderBranchSelector" style="margin-bottom:1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+
+            <div id="orderBranchSelector"
+              style="margin-bottom:1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
               <label><strong>¿En qué sucursal estás? (Filtro)</strong></label>
-              <select id="activeBranch" class="form-group" style="margin-top: 0.5rem;" onchange="window.setBranch(this.value)">
+              <select id="activeBranch" class="form-group" style="margin-top: 0.5rem;"
+                onchange="window.setBranch(this.value)">
                 <option value="">-- Seleccioná una sucursal --</option>
               </select>
             </div>
@@ -169,7 +205,9 @@
         <section id="sec-precios" class="portal-section" style="display:none;">
           <div class="admin-card">
             <h3>Actualización Rápida de Precios y Stock</h3>
-            <select id="priceCatFilter" style="margin-bottom: 1rem; max-width: 300px; padding: 0.5rem;"><option value="all">Todas</option></select>
+            <select id="priceCatFilter" style="margin-bottom: 1rem; max-width: 300px; padding: 0.5rem;">
+              <option value="all">Todas</option>
+            </select>
             <div style="overflow-x: auto;">
               <table style="width:100%; text-align:left; border-collapse: collapse;">
                 <thead>
@@ -188,58 +226,42 @@
         <!-- SECTION: PAGOS -->
         <section id="sec-pagos" class="portal-section" style="display:none;">
           <div class="admin-card">
-            
             <div style="margin-bottom:1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
               <label><strong>¿En qué sucursal estás? (Filtro)</strong></label>
-              <select id="activeBranchPagos" class="form-group" style="margin-top: 0.5rem;" onchange="window.setBranch(this.value)">
+              <select id="activeBranchPagos" class="form-group" style="margin-top: 0.5rem;"
+                onchange="window.setBranch(this.value)">
                 <option value="">-- Seleccioná una sucursal --</option>
               </select>
             </div>
-
             <h3>Pedidos Pendientes de Pago</h3>
             <div id="pagosList" style="display: flex; flex-direction: column; gap: 1rem;"></div>
           </div>
         </section>
 
-        <!-- SECTION: COMBOS -->
-        <section id="sec-combos" class="portal-section" style="display:none;">
+        <!-- SECTION: TRANSPORTISTA -->
+        <section id="sec-transportista" class="portal-section" style="display:none;">
           <div class="admin-card">
-            <h3>Gestión de Combos (Destacados)</h3>
-            <form id="comboForm" style="margin-bottom: 2rem;">
-               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                  <div class="form-group">
-                    <label>Nombre del Producto *</label>
-                    <input type="text" id="comboName" required>
-                  </div>
-                  <div class="form-group">
-                    <label>Precio *</label>
-                    <input type="number" step="0.01" id="comboPrice" required>
-                  </div>
-               </div>
-               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                  <div class="form-group">
-                    <label>Precio Oferta *</label>
-                    <input type="number" step="0.01" id="comboOfferPrice" required>
-                  </div>
-                  <div class="form-group">
-                    <label>Vencimiento Oferta *</label>
-                    <input type="date" id="comboOfferExpires" required>
-                  </div>
-               </div>
-               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                  <div class="form-group">
-                    <label>Categoría *</label>
-                    <select id="comboCategory" required></select>
-                  </div>
-                  <div class="form-group">
-                    <label>URL de Imagen</label>
-                    <input type="url" id="comboImage" placeholder="https://...">
-                  </div>
-               </div>
-               <button type="submit" class="btn btn-success" style="width:100%;">Agregar Combo Destacado</button>
-            </form>
-            <div id="comboList"></div>
-          </div>
+            <div style="margin-bottom:1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+              <label><strong>Configuración de Ruta</strong></label>
+              <select id="activeBranchTransp" class="form-group" style="margin-top: 0.5rem;"
+                onchange="window.setBranch(this.value)">
+                <option value="">-- Seleccioná tu sucursal --</option>
+              </select>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 2rem;">
+              <button class="btn btn-primary" id="btnOpenScanner"
+                style="width: 100%; padding: 1.5rem; font-size: 1.2rem;">📸 ESCANEAR ENTREGA</button>
+              <div id="qr-reader"
+                style="width: 100%; max-width: 400px; margin: 1rem auto; display: none; border: 2px solid var(--primary-color); border-radius: 8px; overflow: hidden;">
+              </div>
+              <button class="btn btn-outline" id="btnStopScanner" style="display:none; width:100%; margin-top:0.5rem;">
+                ⏹ Detener escáner
+              </button>
+              <div id="transpOrdersList" style="margin-top: 1.5rem; display:flex; flex-direction:column; gap:1rem;">
+              </div>
+
+            </div>
         </section>
 
       </div>
@@ -250,7 +272,15 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, getDoc, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import {
+      getFirestore, collection, getDocs, getDoc, addDoc, deleteDoc,
+      doc, updateDoc, setDoc, serverTimestamp, query, orderBy, where,
+      writeBatch, increment
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import {
+      getStorage, ref, uploadBytes, getDownloadURL, uploadString
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDSjlHVAIWy8LiPaoD31biyTQ3W_UdL5us",
       authDomain: "lacteos-elmilagro.firebaseapp.com",
@@ -259,15 +289,17 @@
       messagingSenderId: "1048870846106",
       appId: "1:1048870846106:web:4b0071677f22f80b12a923"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     const PORTAL_PASSWORD = 'lacteos1214';
 
     function checkAccess() {
       const saved = sessionStorage.getItem('portal_auth');
       if (saved === PORTAL_PASSWORD) return true;
-      
+
       const input = prompt('🔐 Contraseña del portal:');
       if (input === PORTAL_PASSWORD) {
         sessionStorage.setItem('portal_auth', PORTAL_PASSWORD);
@@ -286,16 +318,16 @@
 
       // GLOBALS & STATE
       let activeBranch = sessionStorage.getItem('active_branch') || '';
-      
+
       let categories = [];
       let products = [];
       let orders = [];
       const branches = [
-        {name: 'Sucursal Bolivia'},
-        {name: 'Sucursal Chile'},
-        {name: 'Sucursal Artigas'},
-        {name: 'Sucursal Arenales'},
-        {name: 'Sucursal Orán'}
+        { name: 'Sucursal Bolivia' },
+        { name: 'Sucursal Chile' },
+        { name: 'Sucursal Artigas' },
+        { name: 'Sucursal Arenales' },
+        { name: 'Sucursal Orán' }
       ];
       let productsForPrices = [];
 
@@ -306,7 +338,7 @@
 
       const toastMessage = document.getElementById('toastMessage');
 
-      window.showToast = function(message, type = 'success') {
+      window.showToast = function (message, type = 'success') {
         toastMessage.textContent = message;
         toastMessage.className = `toast show ${type}`;
         setTimeout(() => toastMessage.classList.remove('show'), 3000);
@@ -317,9 +349,9 @@
         { id: 'sec-productos', label: 'Productos', icon: '📦' },
         { id: 'sec-categorias', label: 'Categorías', icon: '🏷️' },
         { id: 'sec-precios', label: 'Precios', icon: '💲' },
-        { id: 'sec-combos', label: 'Combos', icon: '🎁' },
-        { id: 'sec-pedidos', label: 'Pedidos', icon: '🛵' },
-        { id: 'sec-pagos', label: 'Pagos', icon: '💳' },
+        { id: 'sec-pedidos', label: 'Pedidos', icon: '📋' },
+        { id: 'sec-pagos', label: 'Pagos', icon: '💰' },
+        { id: 'sec-transportista', label: 'Transportista', icon: '🛵' }
       ];
 
       function renderNavigation() {
@@ -346,11 +378,10 @@
       }
 
       function triggerTabLoad(id) {
-        if(id === 'sec-productos') { fetchCategoriesForSelect(); fetchProducts(); renderLocalDrafts(); }
-        if(id === 'sec-categorias') fetchCategories();
-        if(id === 'sec-precios') { fetchCategoriesForFilter(); fetchProductsForPrices(); }
-        if(id === 'sec-combos') { fetchCategoriesForSelect('comboCategory'); fetchCombos(); }
-        if(id === 'sec-pedidos' || id === 'sec-pagos') { syncBranchSelectors(); fetchOrders(); }
+        if (id === 'sec-productos') { fetchCategoriesForSelect(); fetchProducts(); renderLocalDrafts(); }
+        if (id === 'sec-categorias') fetchCategories();
+        if (id === 'sec-precios') { fetchCategoriesForFilter(); fetchProductsForPrices(); }
+        if (id === 'sec-pedidos' || id === 'sec-pagos' || id === 'sec-transportista') { syncBranchSelectors(); fetchOrders(); }
       }
 
       document.getElementById('btnLogout').addEventListener('click', () => {
@@ -370,26 +401,31 @@
 
 
       function syncBranchSelectors() {
-        const selects = [document.getElementById('activeBranch'), document.getElementById('activeBranchPagos')];
+        const selects = [
+          document.getElementById('activeBranch'),
+          document.getElementById('activeBranchPagos'),
+          document.getElementById('activeBranchTransp')
+        ];
         selects.forEach(sel => {
           if (!sel) return;
           const oldVal = activeBranch; // save
           sel.innerHTML = '<option value="">-- Seleccioná una sucursal --</option>';
           branches.forEach(b => {
-             const opt = document.createElement('option');
-             opt.value = b.name; opt.textContent = b.name;
-             sel.appendChild(opt);
+            const opt = document.createElement('option');
+            opt.value = b.name; opt.textContent = b.name;
+            sel.appendChild(opt);
           });
           sel.value = oldVal;
         });
       }
 
-      window.setBranch = async function(val) {
+      window.setBranch = async function (val) {
         activeBranch = val;
         sessionStorage.setItem('active_branch', val);
         syncBranchSelectors(); // keeping them in sync visually
         await fetchOrders();
         fetchPendingPayments();
+        renderTransportistOrders();
       }
 
 
@@ -399,40 +435,145 @@
         try {
           const qSnap = await getDocs(collection(db, "orders"));
           orders = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          orders.sort((a,b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+          orders.sort((a, b) => {
+            const tA = a.createdAt?.toMillis?.() || (a.createdAt?.seconds || 0) * 1000;
+            const tB = b.createdAt?.toMillis?.() || (b.createdAt?.seconds || 0) * 1000;
+            return tB - tA;
+          });
+          fetchPendingPayments();
+          renderTransportistOrders();
           renderOrdersList();
-        } catch(e) { console.error('fetchOrders', e); }
+        } catch (e) { console.error('fetchOrders', e); }
+      }
+
+      function renderTransportistOrders() {
+        const container = document.getElementById('transpOrdersList');
+        if (!container) return;
+
+        let filtered = orders.filter(o => o.status === 'en_camino');
+        if (activeBranch) filtered = filtered.filter(o => o.branch === activeBranch);
+
+        if (filtered.length === 0) {
+          container.innerHTML = '<p style="text-align:center; color:var(--text-secondary);">No hay pedidos en camino.</p>';
+          return;
+        }
+
+        container.innerHTML = filtered.map(order => `
+          <div class="admin-list-item" style="flex-direction:column; align-items:flex-start; border-left: 5px solid var(--primary-color);">
+            <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+               <strong>#${order.id.slice(-5).toUpperCase()}</strong>
+               <span>${order.customer?.name}</span>
+            </div>
+            <div style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1rem;">
+               ${order.customer?.address}
+            </div>
+            <div style="width:100%; display:flex; gap:1rem;">
+               <button class="btn btn-outline" style="flex:1; border-color:var(--rojo); color:var(--rojo);" onclick="window.updateOrderStatus('${order.id}', 'retirar_en_sucursal')">⚠️ No encontrado</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      let html5QrCode = null;
+
+      document.getElementById('btnOpenScanner')?.addEventListener('click', async () => {
+        const reader = document.getElementById('qr-reader');
+        const btnOpen = document.getElementById('btnOpenScanner');
+        const btnStop = document.getElementById('btnStopScanner');
+
+        reader.style.display = 'block';
+        btnOpen.style.display = 'none';
+        btnStop.style.display = 'block';
+
+        if (!html5QrCode) {
+          html5QrCode = new Html5Qrcode("qr-reader");
+        }
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        try {
+          await html5QrCode.start({ facingMode: "environment" }, config, async (decodedText) => {
+            await handleQRSuccess(decodedText);
+          });
+        } catch (err) {
+          console.error("Error camara:", err);
+          window.showToast("Error al abrir cámara", "error");
+          stopScanner();
+        }
+      });
+
+      document.getElementById('btnStopScanner')?.addEventListener('click', stopScanner);
+
+      async function stopScanner() {
+        if (html5QrCode && html5QrCode.isScanning) {
+          await html5QrCode.stop();
+        }
+        document.getElementById('qr-reader').style.display = 'none';
+        document.getElementById('btnOpenScanner').style.display = 'block';
+        document.getElementById('btnStopScanner').style.display = 'none';
+      }
+
+      async function handleQRSuccess(orderId) {
+        // Validar si el pedido existe y está en camino
+        const order = orders.find(o => o.id === orderId);
+
+        if (!order) {
+          window.showToast("❌ QR Inválido", "error");
+          return;
+        }
+
+        if (order.status !== 'en_camino') {
+          window.showToast(`❌ El pedido está en estado: ${order.status}`, "error");
+          return;
+        }
+
+        // Si hay sucursal activa, validar que sea de esa sucursal
+        if (activeBranch && order.branch !== activeBranch) {
+          window.showToast("❌ No corresponde a esta sucursal", "error");
+          return;
+        }
+
+        try {
+          await window.updateOrderStatus(orderId, 'entregado');
+          window.showToast("✅ ¡ENTREGA CONFIRMADA!");
+          await stopScanner();
+          // El fetchOrders/render ya se gatilla en updateOrderStatus
+        } catch (e) {
+          window.showToast("Error al actualizar pedido", "error");
+        }
       }
 
       function renderOrdersList() {
         const listEl = document.getElementById('adminOrdersList');
-        if(!listEl) return;
+        if (!listEl) return;
         listEl.innerHTML = '';
-        
+
         // Filter locally because we loaded all 
         let filteredOrders = orders;
-        if(currentOrderStatus !== 'todos') filteredOrders = filteredOrders.filter(o => o.status === currentOrderStatus);
-        if(activeBranch) filteredOrders = filteredOrders.filter(o => o.branch === activeBranch);
+        if (currentOrderStatus !== 'todos') filteredOrders = filteredOrders.filter(o => o.status === currentOrderStatus);
+        if (activeBranch) filteredOrders = filteredOrders.filter(o => o.branch === activeBranch);
 
-        if(filteredOrders.length === 0) { listEl.innerHTML = '<p>No hay pedidos.</p>'; return; }
+        if (filteredOrders.length === 0) { listEl.innerHTML = '<p>No hay pedidos.</p>'; return; }
 
         filteredOrders.forEach((order) => {
           let isPaidStr = order.isPaid ? 'Pagado ✅' : 'Falta Pago ⏳';
-          const itemsHTML = order.items.map(i => `<div>${i.quantity}x ${i.name}</div>`).join('');
-          
+          const itemsHTML = (order.items || []).map(i =>
+            `<div>${i.qty || i.quantity || 1}x ${i.name} — $${Number(i.price * (i.qty || 1)).toLocaleString('es-AR')}</div>`
+          ).join('');
+
           const btnAct = (lbl, cod) => `<button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="window.updateOrderStatus('${order.id}', '${cod}')">${lbl}</button>`;
 
           const div = document.createElement('div');
           div.className = 'admin-list-item';
           div.style.flexDirection = 'column'; div.style.alignItems = 'flex-start';
-          
+
           div.innerHTML = `
             <div style="width: 100%; display: flex; justify-content: space-between;">
               <strong style="color:var(--primary-color)">Pedido #${order.id.slice(-5)}</strong>
               <div style="font-size: 0.8rem;">${order.status} | ${isPaidStr}</div>
             </div>
             <div style="font-size: 0.85rem; color: var(--text-secondary); width: 100%;">
-              Cliente: ${order.customer?.name} (${order.customer?.phone}) | DNI: ${order.customer?.dni || 'N/A'} | Sucursal: ${order.branch||'Generica'}<br>
+              Cliente: ${order.customer?.name} (${order.customer?.phone}) | DNI: ${order.customer?.dni || 'N/A'} | Sucursal: ${order.branch || 'Generica'}<br>
               Lugar: ${order.customer?.address}
             </div>
             <div style="font-size: 0.85rem; background: var(--bg-color); padding: 0.5rem; width: 100%;">
@@ -442,11 +583,11 @@
               <span style="font-weight: bold; color: var(--success-color);">Total: $${Number(order.total).toFixed(2)}</span>
               <div>
                 ${btnAct('⛔ No Autorizado', 'no_autorizado')}
+                ${btnAct('💰 Pagado', 'pagado')}
                 ${btnAct('⏳ Pendiente', 'pending')}
                 ${btnAct('👨‍🍳 Preparando', 'preparando')}
                 ${btnAct('🛵 En Camino', 'en_camino')}
                 ${btnAct('📍 Retiro Sucursal', 'retirar_en_sucursal')}
-                ${btnAct('💳 Pagado', 'pagado')}
                 ${btnAct('✅ Entregado', 'entregado')}
               </div>
             </div>
@@ -455,24 +596,22 @@
         });
       }
 
-      window.updateOrderStatus = async function(id, status) {
+      window.updateOrderStatus = async function (id, status) {
         try {
           await updateDoc(doc(db, "orders", id), { status });
-          window.showToast("Estado: "+status); fetchOrders(); fetchPendingPayments();
-        } catch(e) {}
+          window.showToast("Estado: " + status); fetchOrders(); fetchPendingPayments();
+        } catch (e) { }
       }
 
       async function fetchPendingPayments() {
-        if(orders.length === 0) await fetchOrders(); // load if not loaded
-        
         let pending = orders.filter(o => !o.isPaid && ['transferencia', 'efectivo'].includes(o.paymentMethod));
-        if(activeBranch) pending = pending.filter(o => o.branch === activeBranch);
-        
+        if (activeBranch) pending = pending.filter(o => o.branch === activeBranch);
+
         const list = document.getElementById('pagosList');
-        if(!list) return;
+        if (!list) return;
         list.innerHTML = '';
-        if(pending.length === 0) { list.innerHTML = '<p>No hay pendientes.</p>'; return; }
-        
+        if (pending.length === 0) { list.innerHTML = '<p>No hay pendientes.</p>'; return; }
+
         pending.forEach(order => {
           const div = document.createElement('div');
           div.className = 'admin-card';
@@ -487,12 +626,12 @@
         });
       }
 
-      window.markPaid = async function(id) {
-        if(!confirm("Pagado?")) return;
+      window.markPaid = async function (id) {
+        if (!confirm("Pagado?")) return;
         try {
           await updateDoc(doc(db, "orders", id), { isPaid: true, paidAt: serverTimestamp(), status: 'preparando' });
           window.showToast("Aprobado"); fetchOrders(); fetchPendingPayments();
-        } catch(e){}
+        } catch (e) { }
       }
 
 
@@ -506,7 +645,7 @@
         localDrafts.forEach((p) => {
           const code = `<div class="admin-list-item">
             <div style="display:flex; gap:0.5rem;">
-              <img src="${p.imageURL || 'https://via.placeholder.com/150'}" style="width:40px; height:40px;" onerror="this.src='https://via.placeholder.com/150'">
+              <img src="${p.imageURL || 'logo.png'}" style="width:40px; height:40px;" onerror="this.src='logo.png'">
               <div>
                 <div>${p.name}</div><div style="color:var(--primary-color)">$${Number(p.price).toFixed(2)}</div>
               </div>
@@ -525,14 +664,14 @@
         renderLocalDrafts();
       }
 
-      window.deleteDraft = function(localId) {
+      window.deleteDraft = function (localId) {
         localDrafts = localDrafts.filter(d => d.localId !== localId);
         saveDrafts();
       }
 
-      window.editProduct = function(id, isDraft = false) {
+      window.editProduct = function (id, isDraft = false) {
         let p = isDraft ? localDrafts.find(x => x.localId === id) : products.find(x => x.id === id);
-        if(!p) return;
+        if (!p) return;
         editingProductId = isDraft ? null : id;
         editingDraftId = isDraft ? id : null;
         document.getElementById('prodName').value = p.name || '';
@@ -540,6 +679,7 @@
         document.getElementById('prodCategory').value = p.category || '';
         document.getElementById('prodStock').value = p.stock || 0;
         document.getElementById('prodImage').value = p.imageURL || '';
+        document.getElementById('prodOfferPrice').value = p.offerPrice || '';
         document.getElementById('prodDesc').value = p.description || '';
         document.getElementById('btnCancelEdit').style.display = 'inline-flex';
         document.getElementById('btnSaveProduct').querySelector('span').textContent = isDraft ? 'Actualizar Borrador' : 'Actualizar Nube';
@@ -550,27 +690,29 @@
         const data = {
           name: document.getElementById('prodName').value.trim(),
           price: parseFloat(document.getElementById('prodPrice').value),
+          offerPrice: document.getElementById('prodOfferPrice').value ? parseFloat(document.getElementById('prodOfferPrice').value) : null,
           category: document.getElementById('prodCategory').value,
           stock: parseInt(document.getElementById('prodStock').value) || 0,
           imageURL: document.getElementById('prodImage').value.trim(),
           description: document.getElementById('prodDesc').value.trim(),
           featured: false
         };
-        if(editingProductId) {
+        if (editingProductId) {
           try {
-             await updateDoc(doc(db, "products", editingProductId), data);
-             window.showToast("Nube actulizada"); fetchProducts(); document.getElementById('productForm').reset(); editingProductId=null;
-          } catch(err){}
+            await updateDoc(doc(db, "products", editingProductId), data);
+            await syncCategoryToStorage(data.category);
+            window.showToast("Nube actulizada"); fetchProducts(); document.getElementById('productForm').reset(); editingProductId = null;
+          } catch (err) { }
         } else if (editingDraftId) {
           const idx = localDrafts.findIndex(d => d.localId === editingDraftId);
-          if(idx>-1) { localDrafts[idx] = {...localDrafts[idx], ...data}; saveDrafts(); window.showToast("Borrador actulizado"); }
-          document.getElementById('productForm').reset(); editingDraftId=null;
+          if (idx > -1) { localDrafts[idx] = { ...localDrafts[idx], ...data }; saveDrafts(); window.showToast("Borrador actulizado"); }
+          document.getElementById('productForm').reset(); editingDraftId = null;
         } else {
           data.localId = 'draft_' + Date.now();
           localDrafts.unshift(data); saveDrafts(); window.showToast("Añadido borrador"); document.getElementById('productForm').reset();
         }
       });
-      
+
       document.getElementById('btnCancelEdit').addEventListener('click', () => {
         editingProductId = null; editingDraftId = null;
         document.getElementById('productForm').reset();
@@ -579,7 +721,7 @@
       });
 
       document.getElementById('btnBulkUpload').addEventListener('click', async () => {
-        if(!confirm(`¿Subir ${localDrafts.length} productos?`)) return;
+        if (!confirm(`¿Subir ${localDrafts.length} productos?`)) return;
         const batch = writeBatch(db);
         localDrafts.forEach(draft => {
           const newRef = doc(collection(db, "products"));
@@ -588,8 +730,12 @@
           batch.set(newRef, docData);
         });
         try {
-          await batch.commit(); window.showToast("¡Sincronizado!"); localDrafts=[]; saveDrafts(); fetchProducts();
-        } catch(e){}
+          await batch.commit();
+          const catsAfectadas = [...new Set(localDrafts.map(d => d.category).filter(Boolean))];
+          for (const cat of catsAfectadas) { await syncCategoryToStorage(cat); }
+          window.showToast("¡Sincronizado y publicado!");
+          localDrafts = []; saveDrafts(); fetchProducts();
+        } catch (e) { }
       });
 
       async function fetchProducts() {
@@ -599,7 +745,7 @@
           const list = document.getElementById('adminProductList');
           list.innerHTML = '';
           products.forEach(p => {
-             list.innerHTML += `<div class="admin-list-item">
+            list.innerHTML += `<div class="admin-list-item">
               <div><strong>${p.name} ☁️</strong> ($${p.price})</div>
               <div>
                 <button class="btn btn-outline" style="padding: 0.25rem 0.5rem;" onclick="window.editProduct('${p.id}', false)">✏️</button>
@@ -607,12 +753,18 @@
               </div>
              </div>`;
           });
-        } catch(e){}
+        } catch (e) { }
       }
 
-      window.deleteProduct = async function(id) {
-         if(!confirm('Borrar original nube?')) return;
-         try { await deleteDoc(doc(db, "products", id)); fetchProducts(); fetchProductsForPrices(); } catch(e){}
+      window.deleteProduct = async function (id) {
+        if (!confirm('Borrar original nube?')) return;
+        try {
+          const prod = products.find(p => p.id === id);
+          const cat = prod?.category;
+          await deleteDoc(doc(db, "products", id));
+          if (cat) await syncCategoryToStorage(cat);
+          fetchProducts(); fetchProductsForPrices();
+        } catch (e) { }
       }
 
 
@@ -622,111 +774,184 @@
           const qSnap = await getDocs(collection(db, "categories"));
           categories = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           const list = document.getElementById('adminCategoryList');
-          if(list) {
+          if (list) {
             list.innerHTML = '';
             categories.forEach(c => {
-               list.innerHTML += `<div class="admin-list-item">
-                <span>${c.icon||''} ${c.name}</span>
+              list.innerHTML += `<div class="admin-list-item">
+                <span>${c.icon || ''} ${c.name}</span>
                 <button class="btn btn-danger" style="padding: 0.25rem; font-size:0.8rem;" onclick="window.deleteCategory('${c.id}')">E</button>
                </div>`;
             });
           }
-        } catch(e){}
+        } catch (e) { }
       }
       function fetchCategoriesForSelect(targetId = 'prodCategory') {
-         const sel = document.getElementById(targetId);
-         if(!sel) return;
-         sel.innerHTML = '<option value="">Selecciona</option>';
-         categories.forEach(c => { sel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+        const ids = ['prodCategory', 'syncCategorySelect'];
+        ids.forEach(id => {
+          const sel = document.getElementById(id);
+          if (!sel) return;
+          sel.innerHTML = '<option value="">Seleccioná categoría</option>';
+          categories.forEach(c => { sel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+        });
+      }
+
+      // --- STORAGE SYNC ---
+      async function syncCategoryToStorage(categoryName) {
+        try {
+          // 1. Fetch Data
+          const snap = await getDocs(query(collection(db, 'products'), where('category', '==', categoryName)));
+          const productos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          // 2. Validate & Stringify
+          const payloadObject = {
+            category: categoryName,
+            lastUpdated: new Date().toISOString(),
+            count: productos.length,
+            products: productos
+          };
+          const catalogString = JSON.stringify(payloadObject);
+          console.warn(`[DEBUG-UPLOAD] 1. String generado para ${categoryName}. Longitud:`, catalogString.length);
+
+          if (!catalogString || catalogString.length < 10) {
+            throw new Error("El JSON generado está vacío o es inválido.");
+          }
+
+          // 3. Upload to Storage (Usando Blob para evitar cortes de cadena de texto)
+          const blob = new Blob([catalogString], { type: "application/json" });
+          console.warn(`[DEBUG-UPLOAD] 2. Blob creado. Tamaño en bytes:`, blob.size);
+
+          const storageRef = ref(storage, `catalog/${categoryName}.json`);
+
+          await uploadBytes(storageRef, blob);
+          console.warn(`[DEBUG-UPLOAD] 3. UploadBytes completado exitosamente para ${categoryName}`);
+
+          // 4. Update Metadata
+          await setDoc(doc(db, 'meta', 'catalog'), {
+            versions: { [categoryName]: increment(1) },
+            lastUpdated: serverTimestamp()
+          }, { merge: true });
+
+          window.showToast(`✅ ${categoryName} sincronizado (${productos.length} items)`);
+
+        } catch (error) {
+          console.error(`Error sincronizando ${categoryName}:`, error);
+          window.showToast(`❌ Error al subir ${categoryName}`, 'error');
+        }
+      }
+
+      window.handleSyncCategory = async function () {
+        const cat = document.getElementById('syncCategorySelect').value;
+        if (!cat) { window.showToast('Elegí una categoría primero', 'error'); return; }
+        const spinner = document.getElementById('syncSpinner');
+        spinner.classList.add('active');
+        await syncCategoryToStorage(cat);
+        spinner.classList.remove('active');
+      }
+
+      window.handleSyncAll = async function () {
+        if (!confirm('¿Sincronizar TODO el catálogo? (Optimizado: 1 sola lectura global)')) return;
+        const spinner = document.getElementById('syncSpinner');
+        spinner.classList.add('active');
+
+        try {
+          // 1. Una sola lectura de todos los productos
+          const snap = await getDocs(collection(db, 'products'));
+          const allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          // 2. Agrupar por categoría en memoria
+          const grouped = {};
+          categories.forEach(c => grouped[c.name] = []);
+          allProducts.forEach(p => {
+            if (grouped[p.category]) grouped[p.category].push(p);
+            else grouped[p.category] = [p];
+          });
+
+          // 3. Subir cada categoría a Storage y preparar el update de meta
+          const metaVersions = {};
+          for (const catName of Object.keys(grouped)) {
+            const list = grouped[catName];
+            const json = JSON.stringify({
+              category: catName,
+              lastUpdated: new Date().toISOString(),
+              count: list.length,
+              products: list
+            });
+            const storageRef = ref(storage, `catalog/${catName}.json`);
+            await uploadString(storageRef, json, 'raw', { contentType: 'application/json' });
+            metaVersions[catName] = increment(1);
+          }
+
+          // 4. Update único del documento meta
+          await setDoc(doc(db, 'meta', 'catalog'), {
+            versions: metaVersions,
+            lastUpdated: serverTimestamp()
+          }, { merge: true });
+
+          window.showToast('✅ Catálogo completo sincronizado');
+        } catch (e) {
+          console.error("Error global sync:", e);
+          window.showToast("Error en sincronización global", "error");
+        }
+        spinner.classList.remove('active');
       }
       function fetchCategoriesForFilter() {
-         const sel = document.getElementById('priceCatFilter');
-         sel.innerHTML = '<option value="all">Todas</option>';
-         categories.forEach(c => { sel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+        const sel = document.getElementById('priceCatFilter');
+        sel.innerHTML = '<option value="all">Todas</option>';
+        categories.forEach(c => { sel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
       }
 
       document.getElementById('categoryForm').addEventListener('submit', async (e) => {
-         e.preventDefault();
-         const data = {
-           name: document.getElementById('catName').value.trim(),
-           icon: document.getElementById('catIcon').value.trim(),
-           order: parseInt(document.getElementById('catOrder').value) || 0
-         };
-         try { await addDoc(collection(db,"categories"), data); window.showToast("OK"); e.target.reset(); fetchCategories(); } catch(e){}
+        e.preventDefault();
+        const data = {
+          name: document.getElementById('catName').value.trim(),
+          icon: document.getElementById('catIcon').value.trim(),
+          order: parseInt(document.getElementById('catOrder').value) || 0
+        };
+        try { await addDoc(collection(db, "categories"), data); window.showToast("OK"); e.target.reset(); fetchCategories(); } catch (e) { }
       });
-      window.deleteCategory = async function(id) { if(!confirm("?")) return; try { await deleteDoc(doc(db,"categories",id)); fetchCategories(); } catch(e){} }
+      window.deleteCategory = async function (id) { if (!confirm("?")) return; try { await deleteDoc(doc(db, "categories", id)); fetchCategories(); } catch (e) { } }
 
 
       // --- PRECIOS ---
       async function fetchProductsForPrices() {
         try {
-          if(products.length === 0) {
-             const qSnap = await getDocs(collection(db, "products"));
-             products = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          if (products.length === 0) {
+            const qSnap = await getDocs(collection(db, "products"));
+            products = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           }
           productsForPrices = products;
           window.renderPricesTable();
-        } catch(e){}
+        } catch (e) { }
       }
 
-      window.renderPricesTable = function() {
+      window.renderPricesTable = function () {
         const tbody = document.getElementById('pricesTableBody');
         tbody.innerHTML = '';
         const filter = document.getElementById('priceCatFilter').value;
         let pds = filter === 'all' ? productsForPrices : productsForPrices.filter(p => p.category === filter);
         pds.forEach(p => {
-           tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);">
+          tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);">
             <td style="padding: 0.5rem;"><div style="font-weight:bold; font-size:0.9rem;">${p.name}</div><div style="font-size:0.75rem;">${p.category}</div></td>
             <td style="padding: 0.5rem;"><input type="number" step="0.01" value="${p.price}" onblur="window.updatePriceField('${p.id}', 'price', this.value)" style="width: 80px;"></td>
-            <td style="padding: 0.5rem;"><input type="number" value="${p.stock||0}" onblur="window.updatePriceField('${p.id}', 'stock', this.value)" style="width: 60px;"></td>
+            <td style="padding: 0.5rem;"><input type="number" value="${p.stock || 0}" onblur="window.updatePriceField('${p.id}', 'stock', this.value)" style="width: 60px;"></td>
            </tr>`;
         });
       }
 
-      window.updatePriceField = async function(id, field, value) {
-         try {
-           const parsed = field==='price'? parseFloat(value):parseInt(value);
-           if(isNaN(parsed)) return;
-           await updateDoc(doc(db, "products", id), { [field]: parsed }); window.showToast(field + " actulizado");
-           const idx = productsForPrices.findIndex(x=>x.id===id); if(idx>-1) productsForPrices[idx][field] = parsed;
-         } catch(e){}
+      window.updatePriceField = async function (id, field, value) {
+        try {
+          const parsed = field === 'price' ? parseFloat(value) : parseInt(value);
+          if (isNaN(parsed)) return;
+          await updateDoc(doc(db, "products", id), { [field]: parsed });
+          const prod = productsForPrices.find(x => x.id === id);
+          if (prod?.category) await syncCategoryToStorage(prod.category);
+          window.showToast(field + " actulizado");
+          const idx = productsForPrices.findIndex(x => x.id === id); if (idx > -1) productsForPrices[idx][field] = parsed;
+        } catch (e) { }
       }
       document.getElementById('priceCatFilter').addEventListener('change', window.renderPricesTable);
 
 
-      // --- COMBOS ---
-      async function fetchCombos() {
-         try {
-           const qSnap = await getDocs(query(collection(db, "products"), where("featured", "==", true)));
-           const combos = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-           const list = document.getElementById('comboList');
-           list.innerHTML = '';
-           combos.forEach(c => {
-             list.innerHTML += `<div class="admin-list-item">
-              <div><strong>${c.name}</strong><div style="font-size:0.8rem;color:var(--danger-color);">OFERTA: $${c.offerPrice}</div></div>
-              <button class="btn btn-outline" onclick="window.removeComboStatus('${c.id}')">Quitar Destacado</button>
-             </div>`;
-           });
-         } catch(e){}
-      }
-
-      document.getElementById('comboForm').addEventListener('submit', async(e)=>{
-         e.preventDefault();
-         const data = {
-           name: document.getElementById('comboName').value,
-           price: parseFloat(document.getElementById('comboPrice').value),
-           offerPrice: parseFloat(document.getElementById('comboOfferPrice').value),
-           offerExpires: document.getElementById('comboOfferExpires').value,
-           category: document.getElementById('comboCategory').value,
-           imageURL: document.getElementById('comboImage').value,
-           featured: true, stock: 999
-         };
-         try { await addDoc(collection(db, "products"), data); window.showToast("Agregado"); e.target.reset(); fetchCombos(); } catch(e){}
-      });
-
-      window.removeComboStatus = async function(id) {
-         try { await updateDoc(doc(db, "products", id), { featured: false }); window.showToast("Quitado"); fetchCombos(); } catch(e){}
-      }
 
       // GLOBAL LISTENERS FOR REFRESH
       document.getElementById('orderStatusFilter')?.addEventListener('change', e => { currentOrderStatus = e.target.value; renderOrdersList(); });
@@ -735,12 +960,17 @@
       // UTILS
       function setupListeners() {
         const urlIn = document.getElementById('prodImage'), prev = document.getElementById('imagePreview'), pCon = document.getElementById('imagePreviewContainer');
-        if(urlIn) {
-           urlIn.addEventListener('input', () => {
-              if(urlIn.value.trim()) { prev.src = urlIn.value; pCon.classList.add('has-image'); }
-              else pCon.classList.remove('has-image');
-           });
+        if (urlIn) {
+          urlIn.addEventListener('input', () => {
+            if (urlIn.value.trim()) { prev.src = urlIn.value; pCon.classList.add('has-image'); }
+            else pCon.classList.remove('has-image');
+          });
         }
+
+        document.getElementById('ticketModalCloseBtn')?.addEventListener('click', closeTicketModal);
+        document.getElementById('ticketModalOverlay')?.addEventListener('click', closeTicketModal);
+        document.getElementById('btnSyncCategory')?.addEventListener('click', window.handleSyncCategory);
+        document.getElementById('btnSyncAll')?.addEventListener('click', window.handleSyncAll);
       }
 
       function initTheme() {
@@ -748,10 +978,9 @@
         document.body.setAttribute('data-theme', savedTheme);
         const themeBtns = document.querySelectorAll('.theme-btn');
         themeBtns.forEach(btn => {
-          if(btn.dataset.themeBtn === savedTheme) btn.classList.add('active');
+          if (btn.dataset.themeBtn === savedTheme) btn.classList.add('active');
           btn.addEventListener('click', () => {
             themeBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active');
-            let theme = btn.dataset.themeBtn; document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme);
           });
         });
       }
@@ -759,4 +988,5 @@
   </script>
 
 </body>
+
 </html>
