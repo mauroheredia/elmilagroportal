@@ -250,17 +250,16 @@
             </div>
 
             <div style="text-align: center; margin-bottom: 2rem;">
-              <button class="btn btn-primary" id="btnOpenScanner"
-                style="width: 100%; padding: 1.5rem; font-size: 1.2rem;">📸 ESCANEAR ENTREGA</button>
-              <div id="qr-reader"
-                style="width: 100%; max-width: 400px; margin: 1rem auto; display: none; border: 2px solid var(--primary-color); border-radius: 8px; overflow: hidden;">
+              <div class="transp-fab-wrapper">
+                <div id="transpOrdersList" style="margin-bottom: 5rem; display:flex; flex-direction:column; gap:1rem;"></div>
+                <button class="fab-scan" id="btnOpenScanner">
+                  📸 ESCANEAR ENTREGA
+                </button>
+                <button class="btn btn-outline fab-stop" id="btnStopScanner" style="display:none;">
+                  ⏹ Detener
+                </button>
+                <div id="qr-reader" style="width:100%; max-width:400px; margin:1rem auto; display:none; border-radius:16px; overflow:hidden;"></div>
               </div>
-              <button class="btn btn-outline" id="btnStopScanner" style="display:none; width:100%; margin-top:0.5rem;">
-                ⏹ Detener escáner
-              </button>
-              <div id="transpOrdersList" style="margin-top: 1.5rem; display:flex; flex-direction:column; gap:1rem;">
-              </div>
-
             </div>
         </section>
 
@@ -1018,6 +1017,45 @@
         document.getElementById('ticketModalOverlay')?.addEventListener('click', closeTicketModal);
         document.getElementById('btnSyncCategory')?.addEventListener('click', window.handleSyncCategory);
         document.getElementById('btnSyncAll')?.addEventListener('click', window.handleSyncAll);
+
+        // Bottom Nav
+        document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const section = btn.dataset.section;
+            
+            if (section === 'sec-more') {
+              const drawer = document.getElementById('moreDrawer');
+              drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
+              return;
+            }
+            
+            document.getElementById('moreDrawer').style.display = 'none';
+            document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Reutilizar la misma lógica del sidebar desktop
+            document.querySelectorAll('.portal-section').forEach(s => s.style.display = 'none');
+            document.getElementById(section).style.display = 'block';
+            if (typeof triggerTabLoad === 'function') triggerTabLoad(section);
+            
+            // Sincronizar sidebar desktop
+            document.querySelectorAll('.admin-menu-item').forEach(m => {
+              m.classList.toggle('active', m.textContent.includes(
+                document.querySelector(`.bottom-nav-item[data-section="${section}"] .bnav-label`)?.textContent || ''
+              ));
+            });
+          });
+        });
+        
+        document.querySelectorAll('.more-drawer-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const section = btn.dataset.section;
+            document.getElementById('moreDrawer').style.display = 'none';
+            document.querySelectorAll('.portal-section').forEach(s => s.style.display = 'none');
+            document.getElementById(section).style.display = 'block';
+            if (typeof triggerTabLoad === 'function') triggerTabLoad(section);
+          });
+        });
       }
 
       function initTheme() {
@@ -1034,6 +1072,33 @@
     }
   </script>
 
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-item active" data-section="sec-productos">
+    <span class="bnav-icon">📦</span>
+    <span class="bnav-label">Productos</span>
+  </button>
+  <button class="bottom-nav-item" data-section="sec-pedidos">
+    <span class="bnav-icon">📋</span>
+    <span class="bnav-label">Pedidos</span>
+  </button>
+  <button class="bottom-nav-item" data-section="sec-transportista">
+    <span class="bnav-icon">🛵</span>
+    <span class="bnav-label">Entregar</span>
+  </button>
+  <button class="bottom-nav-item" data-section="sec-precios">
+    <span class="bnav-icon">💲</span>
+    <span class="bnav-label">Precios</span>
+  </button>
+  <button class="bottom-nav-item" data-section="sec-more">
+    <span class="bnav-icon">···</span>
+    <span class="bnav-label">Más</span>
+  </button>
+</nav>
+
+<div class="more-drawer" id="moreDrawer" style="display:none;">
+  <button class="more-drawer-item" data-section="sec-categorias">🏷️ Categorías</button>
+  <button class="more-drawer-item" data-section="sec-pagos">💰 Pagos</button>
+</div>
 </body>
 
 </html>
