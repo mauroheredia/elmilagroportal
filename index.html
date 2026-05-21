@@ -317,6 +317,7 @@
       document.getElementById('portalLayout').style.display = 'flex';
 
       // GLOBALS & STATE
+      let isProcessingQR = false;
       let activeBranch = sessionStorage.getItem('active_branch') || '';
 
       let categories = [];
@@ -513,34 +514,71 @@
         document.getElementById('btnStopScanner').style.display = 'none';
       }
 
-      async function handleQRSuccess(orderId) {
-        // Validar si el pedido existe y está en camino
-        const order = orders.find(o => o.id === orderId);
+      async function handleQRSuccess(scannedText) {
+        // Anti-loop: ignorar si ya estamos procesando
+        if (isProcessingQR) return;
+        isProcessingQR = true;
 
-        if (!order) {
-          window.showToast("❌ QR Inválido", "error");
-          return;
-        }
+        // Detener escáner INMEDIATAMENTE antes de cualquier operación async
+        try {
+          await html5QrCode.stop();
+        } catch(e) {}
+        document.getElementById('qr-reader').style.display = 'none';
+        document.getElementById('btnOpenScanner').style.display = 'block';
+        document.getElementById('btnStopScanner').style.display = 'none';
 
-        if (order.status !== 'en_camino') {
-          window.showToast(`❌ El pedido está en estado: ${order.status}`, "error");
-          return;
-        }
+        // Limpiar el orderId escaneado
+        const orderId = scannedText.trim().replace(/^#/, '');
 
-        // Si hay sucursal activa, validar que sea de esa sucursal
-        if (activeBranch && order.branch !== activeBranch) {
-          window.showToast("❌ No corresponde a esta sucursal", "error");
+        if (!orderId || orderId.length < 10) {
+          window.showToast('❌ QR inválido', 'error');
+          isProcessingQR = false;
           return;
         }
 
         try {
-          await window.updateOrderStatus(orderId, 'entregado');
-          window.showToast("✅ ¡ENTREGA CONFIRMADA!");
-          await stopScanner();
-          // El fetchOrders/render ya se gatilla en updateOrderStatus
-        } catch (e) {
-          window.showToast("Error al actualizar pedido", "error");
+          // Lectura DIRECTA a Firestore — no usar array local
+          const orderSnap = await getDoc(doc(db, 'orders', orderId));
+
+          if (!orderSnap.exists()) {
+            window.showToast('❌ Pedido no encontrado', 'error');
+            isProcessingQR = false;
+            return;
+          }
+
+          const order = { id: orderSnap.id, ...orderSnap.data() };
+
+          // Validar sucursal si hay una seleccionada
+          if (activeBranch && order.branch !== activeBranch) {
+            window.showToast('❌ No corresponde a esta sucursal', 'error');
+            isProcessingQR = false;
+            return;
+          }
+
+          // Si ya está entregado, no hacer nada
+          if (order.status === 'entregado') {
+            window.showToast('ℹ️ Este pedido ya fue entregado', 'error');
+            isProcessingQR = false;
+            return;
+          }
+
+          // Marcar como entregado — bypass de cualquier estado anterior
+          await updateDoc(doc(db, 'orders', orderId), {
+            status: 'entregado',
+            deliveredAt: serverTimestamp()
+          });
+
+          window.showToast('✅ ¡ENTREGA CONFIRMADA! #' + orderId.slice(-5).toUpperCase());
+
+          // Refrescar lista de pedidos
+          await fetchOrders();
+
+        } catch(err) {
+          console.error('Error en QR scan:', err);
+          window.showToast('Error al procesar entrega', 'error');
         }
+
+        isProcessingQR = false;
       }
 
       function renderOrdersList() {
@@ -588,7 +626,6 @@
                 ${btnAct('👨‍🍳 Preparando', 'preparando')}
                 ${btnAct('🛵 En Camino', 'en_camino')}
                 ${btnAct('📍 Retiro Sucursal', 'retirar_en_sucursal')}
-                ${btnAct('✅ Entregado', 'entregado')}
               </div>
             </div>
           `;
@@ -596,11 +633,21 @@
         });
       }
 
-      window.updateOrderStatus = async function (id, status) {
+      window.updateOrderStatus = async function(id, status) {
+        // Buscar en array local primero para validación rápida
+        const order = orders.find(o => o.id === id);
+        if (order?.status === 'entregado') {
+          window.showToast('⚠️ No se puede modificar un pedido entregado', 'error');
+          return;
+        }
         try {
           await updateDoc(doc(db, "orders", id), { status });
-          window.showToast("Estado: " + status); fetchOrders(); fetchPendingPayments();
-        } catch (e) { }
+          window.showToast("Estado: " + status);
+          fetchOrders();
+          fetchPendingPayments();
+        } catch(e) {
+          window.showToast('Error al actualizar', 'error');
+        }
       }
 
       async function fetchPendingPayments() {
