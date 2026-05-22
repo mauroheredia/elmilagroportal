@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>El Milagro - Portal Interno</title>
+  <title>El Milagro - Portal administrativo</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
@@ -14,8 +14,8 @@
   <!-- PORTAL LAYOUT -->
   <div id="portalLayout" class="admin-layout" style="display: none;">
     <aside class="admin-sidebar" id="sidebarMenu">
-      <div style="padding: 0 1.5rem; margin-bottom: 2rem;">
-        <img src="logo.png" alt="Logo" style="height: 40px; vertical-align: middle;">
+      <div style="padding: 1rem 1.5rem; margin-bottom: 2.5rem; text-align: center;">
+        <img src="logo.png" alt="Logo" style="height: 120px; display: block; margin: 0 auto;">
       </div>
       <nav id="navLinks">
         <!-- Menu Render -->
@@ -26,14 +26,11 @@
       <header
         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
         <div>
-          <h2 id="portalTitle" style="margin-bottom: 0.2rem;">Panel Unificado</h2>
-          <p id="portalUserInfo" style="color: var(--text-secondary);">Acceso Operativo Centralizado</p>
+          <h2 id="portalTitle" style="margin-bottom: 0.2rem;">Mi milagro</h2>
+          <p id="portalUserInfo" style="color: var(--text-secondary);">¡que tengas un exelente dia!</p>
         </div>
         <div style="display: flex; align-items: center; gap: 1rem;">
-          <div class="theme-toggle-group">
-            <button class="theme-btn active" data-theme-btn="light" title="Claro">☀️</button>
-            <button class="theme-btn" data-theme-btn="dark" title="Oscuro">🌙</button>
-          </div>
+
           <button id="btnLogout" class="btn btn-outline">Salir</button>
         </div>
       </header>
@@ -47,7 +44,8 @@
               <div class="admin-card">
                 <h3>Agregar / Editar Producto</h3>
                 <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
-                  Los productos nuevos se guardan <b>localmente</b> hasta subir en lote.
+                  Los productos nuevos se guardan <b>localmente</b> hasta subir en lote, recuerde Subir a la nube
+                  primero y luego sincronizarlo.
                 </p>
                 <form id="productForm">
                   <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
@@ -106,7 +104,7 @@
                   </h3>
                 </div>
                 <button class="btn btn-success" id="btnBulkUpload" style="width: 100%; margin-bottom: 1rem;" disabled>☁️
-                  Subir a Firebase</button>
+                  Subir a la Nube </button>
 
                 <div
                   style="margin-top: 1rem; padding: 1.5rem; background: var(--amarillo); border-radius: 8px; border: 2px solid var(--verde);">
@@ -148,10 +146,7 @@
                 <label>Nombre de Categoría</label>
                 <input type="text" id="catName" required>
               </div>
-              <div class="form-group">
-                <label>Icono (Emoji)</label>
-                <input type="text" id="catIcon" placeholder="ej: 🍔">
-              </div>
+
               <div class="form-group">
                 <label>Orden</label>
                 <input type="number" id="catOrder" value="0" required>
@@ -203,6 +198,31 @@
 
         <!-- SECTION: PRECIOS -->
         <section id="sec-precios" class="portal-section" style="display:none;">
+
+          <!-- ACTUALIZADOR MASIVO POR PORCENTAJE -->
+          <div class="admin-card" style="border: 2px solid var(--amarillo); margin-bottom: 1.5rem;">
+            <h4 style="margin-bottom: 1rem;">📈 Actualización Masiva de Precios</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
+              <div class="form-group" style="margin:0;">
+                <label>Porcentaje (+ aumento / - descuento)</label>
+                <input type="number" id="bulkPctInput" placeholder="Ej: 15 o -5" step="0.1">
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Categoría</label>
+                <select id="bulkPctCategory">
+                  <option value="__all__">Todas las categorías</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="btnApplyBulkPct" style="height: 52px;">
+                Aplicar
+                <div class="spinner" id="bulkPctSpinner"></div>
+              </button>
+            </div>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.75rem;">
+              ⚠️ Esta acción actualiza Firestore y sincroniza Storage al instante. No se puede deshacer.
+            </p>
+          </div>
+
           <div class="admin-card">
             <h3>Actualización Rápida de Precios y Stock</h3>
             <select id="priceCatFilter" style="margin-bottom: 1rem; max-width: 300px; padding: 0.5rem;">
@@ -251,14 +271,17 @@
 
             <div style="text-align: center; margin-bottom: 2rem;">
               <div class="transp-fab-wrapper">
-                <div id="transpOrdersList" style="margin-bottom: 5rem; display:flex; flex-direction:column; gap:1rem;"></div>
+                <div id="transpOrdersList" style="margin-bottom: 5rem; display:flex; flex-direction:column; gap:1rem;">
+                </div>
                 <button class="fab-scan" id="btnOpenScanner">
                   📸 ESCANEAR ENTREGA
                 </button>
                 <button class="btn btn-outline fab-stop" id="btnStopScanner" style="display:none;">
                   ⏹ Detener
                 </button>
-                <div id="qr-reader" style="width:100%; max-width:400px; margin:1rem auto; display:none; border-radius:16px; overflow:hidden;"></div>
+                <div id="qr-reader"
+                  style="width:100%; max-width:400px; margin:1rem auto; display:none; border-radius:16px; overflow:hidden;">
+                </div>
               </div>
             </div>
         </section>
@@ -460,12 +483,30 @@
 
         container.innerHTML = filtered.map(order => `
           <div class="admin-list-item" style="flex-direction:column; align-items:flex-start; border-left: 5px solid var(--primary-color);">
-            <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:0.75rem;">
                <strong>#${order.id.slice(-5).toUpperCase()}</strong>
-               <span>${order.customer?.name}</span>
+               <span style="font-size:0.8rem; color:var(--text-secondary);">${order.status}</span>
             </div>
-            <div style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1rem;">
-               ${order.customer?.address}
+            <div style="background:var(--bg); border-radius:12px; padding:1.25rem; margin-bottom:1rem; border:2px solid var(--verde); width:100%;">
+              <div style="font-size:1.4rem; font-weight:900; font-family:var(--font-display); color:var(--text); margin-bottom:0.5rem;">
+                👤 ${order.customer?.name || 'Sin nombre'}
+              </div>
+              <div style="font-size:1rem; color:var(--text-secondary); margin-bottom:1rem;">
+                📍 ${order.customer?.address || ''}, ${order.customer?.zone || ''} — ${order.branch || ''}
+              </div>
+              <a href="tel:${(order.customer?.phone || '').replace(/\s/g, '')}" style="display:flex; align-items:center; justify-content:center; gap:0.75rem; background:var(--verde); color:white; padding:1rem; border-radius:12px; font-size:1.2rem; font-weight:900; text-decoration:none; margin-bottom:0.75rem; min-height:56px;">
+                📞 Llamar: ${order.customer?.phone || 'Sin teléfono'}
+              </a>
+              <details style="margin-top:0.5rem;">
+                <summary style="cursor:pointer; font-weight:700; color:var(--verde); font-size:0.85rem; list-style:none;">
+                  📦 Ver qué llevar (${(order.items || []).length} productos)
+                </summary>
+                <div style="margin-top:0.5rem; font-size:0.9rem;">
+                  ${(order.items || []).map(i =>
+          `<div style="padding:0.3rem 0; border-bottom:1px solid var(--border-color);"><strong>${i.qty || 1}x</strong> ${i.name}</div>`
+        ).join('')}
+                </div>
+              </details>
             </div>
             <div style="width:100%; display:flex; gap:1rem;">
                <button class="btn btn-outline" style="flex:1; border-color:var(--rojo); color:var(--rojo);" onclick="window.updateOrderStatus('${order.id}', 'retirar_en_sucursal')">⚠️ No encontrado</button>
@@ -521,7 +562,7 @@
         // Detener escáner INMEDIATAMENTE antes de cualquier operación async
         try {
           await html5QrCode.stop();
-        } catch(e) {}
+        } catch (e) { }
         document.getElementById('qr-reader').style.display = 'none';
         document.getElementById('btnOpenScanner').style.display = 'block';
         document.getElementById('btnStopScanner').style.display = 'none';
@@ -572,7 +613,7 @@
           // Refrescar lista de pedidos
           await fetchOrders();
 
-        } catch(err) {
+        } catch (err) {
           console.error('Error en QR scan:', err);
           window.showToast('Error al procesar entrega', 'error');
         }
@@ -618,21 +659,37 @@
             </div>
             <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
               <span style="font-weight: bold; color: var(--success-color);">Total: $${Number(order.total).toFixed(2)}</span>
-              <div>
-                ${btnAct('⛔ No Autorizado', 'no_autorizado')}
-                ${btnAct('💰 Pagado', 'pagado')}
-                ${btnAct('⏳ Pendiente', 'pending')}
-                ${btnAct('👨‍🍳 Preparando', 'preparando')}
-                ${btnAct('🛵 En Camino', 'en_camino')}
-                ${btnAct('📍 Retiro Sucursal', 'retirar_en_sucursal')}
+            </div>
+            <details class="order-items-detail">
+              <summary style="cursor:pointer; padding:0.5rem 0; font-weight:700; color:var(--verde); font-size:0.9rem; list-style:none; display:flex; align-items:center; gap:0.5rem;">
+                📦 Ver productos del pedido (${(order.items || []).length} ítems)
+              </summary>
+              <div style="margin-top:0.75rem; padding:0.75rem; background:var(--bg); border-radius:8px; display:flex; flex-direction:column; gap:0.4rem;">
+                ${(order.items || []).map(i => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; padding:0.3rem 0; border-bottom:1px solid var(--border-color);">
+                    <span><strong>${i.qty || i.quantity || 1}x</strong> ${i.name}</span>
+                    <span style="font-weight:700; color:var(--rojo);">$${Number((i.price || 0) * (i.qty || i.quantity || 1)).toLocaleString('es-AR')}</span>
+                  </div>
+                `).join('')}
+                <div style="text-align:right; font-weight:900; font-size:1rem; margin-top:0.5rem; color:var(--verde);">
+                  Total: $${Number(order.total || 0).toLocaleString('es-AR')}
+                </div>
               </div>
+            </details>
+            <div style="margin-top: 0.5rem;">
+              ${btnAct('⛔ No Autorizado', 'no_autorizado')}
+              ${btnAct('💰 Pagado', 'pagado')}
+              ${btnAct('⏳ Pendiente', 'pending')}
+              ${btnAct('👨‍🍳 Preparando', 'preparando')}
+              ${btnAct('🛵 En Camino', 'en_camino')}
+              ${btnAct('📍 Retiro Sucursal', 'retirar_en_sucursal')}
             </div>
           `;
           listEl.appendChild(div);
         });
       }
 
-      window.updateOrderStatus = async function(id, status) {
+      window.updateOrderStatus = async function (id, status) {
         // Buscar en array local primero para validación rápida
         const order = orders.find(o => o.id === id);
         if (order?.status === 'entregado') {
@@ -644,7 +701,7 @@
           window.showToast("Estado: " + status);
           fetchOrders();
           fetchPendingPayments();
-        } catch(e) {
+        } catch (e) {
           window.showToast('Error al actualizar', 'error');
         }
       }
@@ -839,6 +896,76 @@
           sel.innerHTML = '<option value="">Seleccioná categoría</option>';
           categories.forEach(c => { sel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
         });
+        // Poblar bulkPctCategory conservando la opción "Todas"
+        const bulkSel = document.getElementById('bulkPctCategory');
+        if (bulkSel) {
+          while (bulkSel.options.length > 1) bulkSel.remove(1);
+          categories.forEach(cat => {
+            bulkSel.add(new Option((cat.icon || '') + ' ' + cat.name, cat.name));
+          });
+        }
+      }
+
+      // --- ACTUALIZACIÓN MASIVA POR PORCENTAJE ---
+      async function applyBulkPriceUpdate() {
+        const pct = parseFloat(document.getElementById('bulkPctInput').value);
+        const cat = document.getElementById('bulkPctCategory').value;
+
+        if (isNaN(pct) || pct === 0) {
+          window.showToast('Ingresá un porcentaje válido', 'error');
+          return;
+        }
+
+        const confirmMsg = `¿Aplicar ${pct > 0 ? '+' : ''}${pct}% a ${cat === '__all__' ? 'TODAS las categorías' : 'categoría ' + cat}?`;
+        if (!confirm(confirmMsg)) return;
+
+        const spinner = document.getElementById('bulkPctSpinner');
+        const btn = document.getElementById('btnApplyBulkPct');
+        spinner.classList.add('active');
+        btn.disabled = true;
+
+        const factor = 1 + (pct / 100);
+
+        try {
+          let snap;
+          if (cat === '__all__') {
+            snap = await getDocs(collection(db, 'products'));
+          } else {
+            snap = await getDocs(query(collection(db, 'products'), where('category', '==', cat)));
+          }
+
+          const docsList = snap.docs;
+          const BATCH_SIZE = 499;
+
+          for (let i = 0; i < docsList.length; i += BATCH_SIZE) {
+            const batch = writeBatch(db);
+            const chunk = docsList.slice(i, i + BATCH_SIZE);
+            chunk.forEach(d => {
+              const currentPrice = d.data().price || 0;
+              const newPrice = Math.round(currentPrice * factor);
+              batch.update(d.ref, { price: newPrice });
+            });
+            await batch.commit();
+          }
+
+          const catsAfectadas = cat === '__all__'
+            ? [...new Set(docsList.map(d => d.data().category).filter(Boolean))]
+            : [cat];
+
+          for (const c of catsAfectadas) {
+            await syncCategoryToStorage(c);
+          }
+
+          window.showToast(`✅ Precios actualizados y publicados (${docsList.length} productos)`);
+          fetchProductsForPrices();
+
+        } catch (e) {
+          console.error(e);
+          window.showToast('Error al actualizar precios', 'error');
+        }
+
+        spinner.classList.remove('active');
+        btn.disabled = false;
       }
 
       // --- STORAGE SYNC ---
@@ -1017,27 +1144,28 @@
         document.getElementById('ticketModalOverlay')?.addEventListener('click', closeTicketModal);
         document.getElementById('btnSyncCategory')?.addEventListener('click', window.handleSyncCategory);
         document.getElementById('btnSyncAll')?.addEventListener('click', window.handleSyncAll);
+        document.getElementById('btnApplyBulkPct')?.addEventListener('click', applyBulkPriceUpdate);
 
         // Bottom Nav
         document.querySelectorAll('.bottom-nav-item').forEach(btn => {
           btn.addEventListener('click', () => {
             const section = btn.dataset.section;
-            
+
             if (section === 'sec-more') {
               const drawer = document.getElementById('moreDrawer');
               drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
               return;
             }
-            
+
             document.getElementById('moreDrawer').style.display = 'none';
             document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             // Reutilizar la misma lógica del sidebar desktop
             document.querySelectorAll('.portal-section').forEach(s => s.style.display = 'none');
             document.getElementById(section).style.display = 'block';
             if (typeof triggerTabLoad === 'function') triggerTabLoad(section);
-            
+
             // Sincronizar sidebar desktop
             document.querySelectorAll('.admin-menu-item').forEach(m => {
               m.classList.toggle('active', m.textContent.includes(
@@ -1046,7 +1174,7 @@
             });
           });
         });
-        
+
         document.querySelectorAll('.more-drawer-item').forEach(btn => {
           btn.addEventListener('click', () => {
             const section = btn.dataset.section;
@@ -1072,33 +1200,33 @@
     }
   </script>
 
-<nav class="bottom-nav" id="bottomNav">
-  <button class="bottom-nav-item active" data-section="sec-productos">
-    <span class="bnav-icon">📦</span>
-    <span class="bnav-label">Productos</span>
-  </button>
-  <button class="bottom-nav-item" data-section="sec-pedidos">
-    <span class="bnav-icon">📋</span>
-    <span class="bnav-label">Pedidos</span>
-  </button>
-  <button class="bottom-nav-item" data-section="sec-transportista">
-    <span class="bnav-icon">🛵</span>
-    <span class="bnav-label">Entregar</span>
-  </button>
-  <button class="bottom-nav-item" data-section="sec-precios">
-    <span class="bnav-icon">💲</span>
-    <span class="bnav-label">Precios</span>
-  </button>
-  <button class="bottom-nav-item" data-section="sec-more">
-    <span class="bnav-icon">···</span>
-    <span class="bnav-label">Más</span>
-  </button>
-</nav>
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bottom-nav-item active" data-section="sec-productos">
+      <span class="bnav-icon">📦</span>
+      <span class="bnav-label">Productos</span>
+    </button>
+    <button class="bottom-nav-item" data-section="sec-pedidos">
+      <span class="bnav-icon">📋</span>
+      <span class="bnav-label">Pedidos</span>
+    </button>
+    <button class="bottom-nav-item" data-section="sec-transportista">
+      <span class="bnav-icon">🛵</span>
+      <span class="bnav-label">Entregar</span>
+    </button>
+    <button class="bottom-nav-item" data-section="sec-precios">
+      <span class="bnav-icon">💲</span>
+      <span class="bnav-label">Precios</span>
+    </button>
+    <button class="bottom-nav-item" data-section="sec-more">
+      <span class="bnav-icon">···</span>
+      <span class="bnav-label">Más</span>
+    </button>
+  </nav>
 
-<div class="more-drawer" id="moreDrawer" style="display:none;">
-  <button class="more-drawer-item" data-section="sec-categorias">🏷️ Categorías</button>
-  <button class="more-drawer-item" data-section="sec-pagos">💰 Pagos</button>
-</div>
+  <div class="more-drawer" id="moreDrawer" style="display:none;">
+    <button class="more-drawer-item" data-section="sec-categorias">🏷️ Categorías</button>
+    <button class="more-drawer-item" data-section="sec-pagos">💰 Pagos</button>
+  </div>
 </body>
 
 </html>
